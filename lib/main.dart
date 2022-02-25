@@ -17,6 +17,20 @@ class MyApp extends StatelessWidget {
       title: 'Personal Expenses',
       theme: ThemeData(
         primarySwatch: Colors.green,
+        fontFamily: 'Quicksand',
+        appBarTheme: AppBarTheme(
+          // textTheme: ThemeData.light().textTheme.copyWith(
+          //       titleMedium: TextStyle(
+          //         fontFamily: 'OpenSans',
+          //       ),
+          //     ),
+          titleTextStyle: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontFamily: 'OpenSans',
+            color: Colors.black,
+            fontSize: 20,
+          ),
+        ),
       ),
       home: MyHomePage(),
     );
@@ -78,10 +92,11 @@ class _MyHomePageState extends State<MyHomePage> {
         elevation: 0,
         title: Text(
           'Personal Expenses',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          // style: TextStyle(
+          //   color: Colors.black,
+          //   fontWeight: FontWeight.bold,
+          // ),
+          style: Theme.of(context).appBarTheme.titleTextStyle,
         ),
       ),
       body: SingleChildScrollView(
