@@ -37,7 +37,7 @@ class TransactionList extends StatelessWidget {
                     children: [
                       Container(
                         child: Text(
-                          '\$${transactions[index].amount.toStringAsFixed(2)}',
+                          '৳${transactions[index].amount.toStringAsFixed(2)}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 20,
@@ -68,7 +68,7 @@ class TransactionList extends StatelessWidget {
                           Text(
                             DateFormat.yMMMd().format(transactions[index].date),
                             style: TextStyle(
-                              color: Colors.blueGrey,
+                              color: Colors.grey[900],
                             ),
                           ),
                         ],
