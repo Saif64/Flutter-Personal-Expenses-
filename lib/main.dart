@@ -8,7 +8,9 @@ import 'package:flutter_complete_guide/widgets/transaction_list.dart';
 
 import 'models/transaction.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -20,11 +22,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         fontFamily: 'OpenSans',
         appBarTheme: AppBarTheme(
-          // textTheme: ThemeData.light().textTheme.copyWith(
-          //       titleMedium: TextStyle(
-          //         fontFamily: 'OpenSans',
-          //       ),
-          //     ),
           titleTextStyle: TextStyle(
             fontWeight: FontWeight.bold,
             fontFamily: 'OpenSans',
@@ -92,32 +89,71 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  bool _showChart = false;
+
   @override
   Widget build(BuildContext context) {
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    final appBar = AppBar(
+      centerTitle: true,
+      backgroundColor: Colors.white,
+      elevation: 0,
+      title: Text(
+        'Personal Expenses',
+      ),
+    );
+    final txWidget = Container(
+      height: (MediaQuery.of(context).size.height -
+              appBar.preferredSize.height -
+              MediaQuery.of(context).padding.top) *
+          0.7,
+      child: TransactionList(_userTransactions, _deleteItem),
+    );
+
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark));
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Personal Expenses',
-          // style: TextStyle(
-          //   color: Colors.black,
-          //   fontWeight: FontWeight.bold,
-          // ),
-          style: Theme.of(context).appBarTheme.titleTextStyle,
-        ),
-      ),
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Chart(_recentTransactions),
-            TransactionList(_userTransactions, _deleteItem),
+            if (isLandscape)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Show chart'),
+                  Switch(
+                    value: _showChart,
+                    onChanged: (val) {
+                      setState(() {
+                        _showChart = val;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            if (!isLandscape)
+              Container(
+                height: (MediaQuery.of(context).size.height -
+                        appBar.preferredSize.height -
+                        MediaQuery.of(context).padding.top) *
+                    0.3,
+                child: Chart(_recentTransactions),
+              ),
+            if (!isLandscape) txWidget,
+            if (isLandscape)
+              _showChart
+                  ? Container(
+                      height: (MediaQuery.of(context).size.height -
+                              appBar.preferredSize.height -
+                              MediaQuery.of(context).padding.top) *
+                          0.7,
+                      child: Chart(_recentTransactions))
+                  : txWidget,
           ],
         ),
       ),
