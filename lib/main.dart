@@ -1,5 +1,7 @@
 // ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors, prefer_const_literals_to_create_immutables
+import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_complete_guide/widgets/chart.dart';
@@ -93,31 +95,35 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
-    final appBar = AppBar(
-      centerTitle: true,
-      backgroundColor: Colors.white,
-      elevation: 0,
-      title: Text(
-        'Personal Expenses',
-      ),
-    );
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+    final PreferredSizeWidget appBar = Platform.isIOS
+        ? CupertinoNavigationBar(
+            trailing: IconButton(
+              onPressed: () => _startAddNewTransaction(context),
+              icon: Icon(Icons.add),
+            ),
+            middle: Text(
+              'Personal Expenses',
+            ),
+          )
+        : AppBar(
+            centerTitle: true,
+            backgroundColor: Colors.white,
+            elevation: 0,
+            title: Text(
+              'Personal Expenses',
+            ),
+          );
     final txWidget = Container(
-      height: (MediaQuery.of(context).size.height -
+      height: (mediaQuery.size.height -
               appBar.preferredSize.height -
-              MediaQuery.of(context).padding.top) *
+              mediaQuery.padding.top) *
           0.7,
       child: TransactionList(_userTransactions, _deleteItem),
     );
-
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark));
-
-    return Scaffold(
-      appBar: appBar,
-      body: SingleChildScrollView(
+    final pageBody = SafeArea(
+      child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -125,8 +131,9 @@ class _MyHomePageState extends State<MyHomePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Show chart'),
-                  Switch(
+                  Text('Show chart',
+                      style: Theme.of(context).textTheme.titleMedium),
+                  Switch.adaptive(
                     value: _showChart,
                     onChanged: (val) {
                       setState(() {
@@ -138,9 +145,9 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             if (!isLandscape)
               Container(
-                height: (MediaQuery.of(context).size.height -
+                height: (mediaQuery.size.height -
                         appBar.preferredSize.height -
-                        MediaQuery.of(context).padding.top) *
+                        mediaQuery.padding.top) *
                     0.3,
                 child: Chart(_recentTransactions),
               ),
@@ -148,24 +155,80 @@ class _MyHomePageState extends State<MyHomePage> {
             if (isLandscape)
               _showChart
                   ? Container(
-                      height: (MediaQuery.of(context).size.height -
+                      height: (mediaQuery.size.height -
                               appBar.preferredSize.height -
-                              MediaQuery.of(context).padding.top) *
+                              mediaQuery.padding.top) *
                           0.7,
                       child: Chart(_recentTransactions))
                   : txWidget,
           ],
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        backgroundColor: Colors.green,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        onPressed: () => _startAddNewTransaction(context),
-      ),
     );
+
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark));
+
+    return Platform.isIOS
+        ? CupertinoPageScaffold(
+            child: pageBody,
+            navigationBar: appBar,
+          )
+        : Scaffold(
+            appBar: appBar,
+            body: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (isLandscape)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Show chart'),
+                        Switch.adaptive(
+                          value: _showChart,
+                          onChanged: (val) {
+                            setState(() {
+                              _showChart = val;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  if (!isLandscape)
+                    Container(
+                      height: (mediaQuery.size.height -
+                              appBar.preferredSize.height -
+                              mediaQuery.padding.top) *
+                          0.3,
+                      child: Chart(_recentTransactions),
+                    ),
+                  if (!isLandscape) txWidget,
+                  if (isLandscape)
+                    _showChart
+                        ? Container(
+                            height: (mediaQuery.size.height -
+                                    appBar.preferredSize.height -
+                                    mediaQuery.padding.top) *
+                                0.7,
+                            child: Chart(_recentTransactions))
+                        : txWidget,
+                ],
+              ),
+            ),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+            floatingActionButton: Platform.isIOS
+                ? Container()
+                : FloatingActionButton(
+                    child: Icon(Icons.add),
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    onPressed: () => _startAddNewTransaction(context),
+                  ),
+          );
   }
 }
